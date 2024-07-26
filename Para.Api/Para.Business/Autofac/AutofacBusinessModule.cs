@@ -1,9 +1,9 @@
-﻿using Autofac;
+﻿using System.Data;
+using Autofac;
 using AutoMapper;
-using MediatR;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Para.Business.Cqrs;
 using Para.Data.Context;
 using Para.Data.UnitOfWork;
 
@@ -20,14 +20,16 @@ public class AutofacBusinessModule : Module
     
     protected override void Load(ContainerBuilder builder)
     {
-        builder.Register(x =>
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<ParaDbContext>();
-            
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("MsSqlConnection"));
-            
-            return new ParaDbContext(optionsBuilder.Options);
-        }).InstancePerLifetimeScope();
+        var connectionString = configuration.GetConnectionString("MsSqlConnection");
+
+        builder.Register(c => new SqlConnection(connectionString))
+            .As<IDbConnection>().InstancePerLifetimeScope();
+
+        builder.Register(c => new ParaDbContext(new DbContextOptionsBuilder<ParaDbContext>()
+                .UseSqlServer(connectionString)
+                .Options))
+            .AsSelf()
+            .InstancePerLifetimeScope();
 
         var mapperConfig = new MapperConfiguration(cfg =>
         {
