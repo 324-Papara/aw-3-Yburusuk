@@ -4,6 +4,7 @@ using Autofac;
 using FluentValidation.AspNetCore;
 using Microsoft.OpenApi.Models;
 using MediatR;
+using Para.Api.Middlewares;
 using Para.Business.Autofac;
 using Para.Business.Cqrs;
 using Para.Business.Validations;
@@ -50,6 +51,7 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
+        app.UseMiddleware<LoggingMiddleware>();
         if (env.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
