@@ -1,7 +1,9 @@
 using AutoMapper;
+using FluentValidation;
 using MediatR;
 using Para.Base.Response;
 using Para.Business.Cqrs;
+using Para.Business.Validations;
 using Para.Data.Domain;
 using Para.Data.UnitOfWork;
 using Para.Schema;
@@ -24,6 +26,9 @@ public class CustomerCommandHandler :
 
     public async Task<ApiResponse<CustomerResponse>> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
+        CustomerValidator validator = new CustomerValidator();
+        await validator.ValidateAndThrowAsync(request.Request);
+        
         var mapped = mapper.Map<CustomerRequest, Customer>(request.Request);
         mapped.CustomerNumber = new Random().Next(1000000, 9999999);
         await unitOfWork.CustomerRepository.Insert(mapped);
@@ -37,6 +42,8 @@ public class CustomerCommandHandler :
     {
         var mapped = mapper.Map<CustomerRequest, Customer>(request.Request);
         mapped.Id = request.CustomerId;
+        mapped.InsertUser = "System";
+        mapped.CustomerNumber = new Random().Next(1000000, 9999999);
         unitOfWork.CustomerRepository.Update(mapped);
         await unitOfWork.Complete();
         return new ApiResponse();
