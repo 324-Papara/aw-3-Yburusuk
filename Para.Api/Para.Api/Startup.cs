@@ -27,14 +27,13 @@ public class Startup
     
     public void ConfigureServices(IServiceCollection services)
     {
-               
+
         services.AddControllers().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             options.JsonSerializerOptions.WriteIndented = true;
             options.JsonSerializerOptions.PropertyNamingPolicy = null;
-        })
-        .AddFluentValidation(fv => fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
+        });
         
         services.AddSwaggerGen(c =>
         {
